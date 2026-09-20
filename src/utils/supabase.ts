@@ -8,8 +8,8 @@ const STORAGE_KEYS = {
 
 // Get environment credentials or user-provided runtime credentials
 export function getSupabaseCredentials(): { url: string; anonKey: string } {
-  const envUrl = import.meta.env.VITE_SUPABASE_URL || '';
-  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+  const envUrl = import.meta.env.VITE_SUPABASE_URL || import.meta.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
 
   const customUrl = localStorage.getItem(STORAGE_KEYS.CUSTOM_URL) || '';
   const customKey = localStorage.getItem(STORAGE_KEYS.CUSTOM_ANON_KEY) || '';
