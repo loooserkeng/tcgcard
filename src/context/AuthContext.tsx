@@ -172,6 +172,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           isActive: raw.is_active !== false,
         };
         localStorage.setItem('pcc_session', JSON.stringify({ token: data.session_token || '' }));
+        localStorage.setItem(SESSION_KEY, p.id);
+        localStorage.setItem(PLAYER_OBJECT_KEY(p.id), JSON.stringify(p));
+        localStorage.setItem(PLAYER_KEY(p.username), JSON.stringify(p));
         setPlayer(p);
         return { error: null };
       } catch (e: any) {
@@ -242,15 +245,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    try {
-      const supabase = getSupabase();
-      const token = (() => {
-        try { return (JSON.parse(localStorage.getItem('pcc_session') || '{}') as { token?: string }).token || ''; } catch { return ''; }
-      })();
-      if (supabase && token) {
-        await supabase.rpc('logout_player', { p_session_token: token });
-      }
-    } catch {}
     localStorage.removeItem('pcc_session');
     localStorage.removeItem(SESSION_KEY);
     setPlayer(null);
