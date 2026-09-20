@@ -17,3 +17,25 @@ export async function createCardInSupabase(card:PersonCard){return {card,error:n
 export async function fetchCardsCatalogFromSupabase(){return [] as PersonCard[]}
 export async function fetchUserCollectionFromSupabase(id:string,_token?:string){return getStoredCollection(id)}
 export async function fetchUserPacksFromSupabase(id:string){return getStoredPackHistory(id)}
+
+export async function updateCardInSupabase(card: PersonCard){
+  const cards = read<PersonCard[]>(customKey, []);
+  const existsInInitial = INITIAL_CARDS.some(c => c.id === card.id);
+  if (existsInInitial) return { card, error: null as string | null };
+  localStorage.setItem(customKey, JSON.stringify([card, ...cards.filter(c => c.id !== card.id)]));
+  return { card, error: null as string | null };
+}
+export async function deleteCardFromSupabase(cardId: string){
+  const cards = read<PersonCard[]>(customKey, []);
+  localStorage.setItem(customKey, JSON.stringify(cards.filter(c => c.id !== cardId)));
+  return { error: null as string | null };
+}
+export async function seedInitialCardsToSupabase(){
+  const cards = read<PersonCard[]>(customKey, []);
+  const merged = [...cards];
+  for (const card of INITIAL_CARDS) {
+    if (!merged.some(c => c.id === card.id)) merged.push(card);
+  }
+  localStorage.setItem(customKey, JSON.stringify(merged));
+  return { count: INITIAL_CARDS.length, error: null as string | null };
+}
