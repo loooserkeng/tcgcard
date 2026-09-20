@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { CooldownState, Player } from '../types';
+import { getSupabase, isSupabaseConfigured } from '../utils/supabase';
 
 type Mode = 'LOGIN' | 'SIGNUP';
 type WelcomeModalState = 'NONE' | 'NEW_PLAYER' | 'RETURNING_PLAYER';
@@ -145,24 +146,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const normalized = username.trim().toLowerCase();
     if (!normalized || !password) return { error: 'Username and password are required.' };
 
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabase();
+        const { data, error } = await supabase!.rpc('login_player', {
+          p_username: username.trim(),
+          p_password: password,
+        });
+        if (error) return { error: error.message || 'Login failed.' };
+        if (!data?.success) return { error: data?.error || 'Invalid username or password.' };
+
+        const raw = data.player || {};
+        const p: Player = {
+          id: raw.id,
+          username: raw.username,
+          usernameNormalized: (raw.username || '').toLowerCase(),
+          displayName: raw.display_name ?? raw.displayName ?? raw.username,
+          role: raw.role === 'ADMIN' ? 'ADMIN' : 'USER',
+          createdAt: raw.created_at || new Date().toISOString(),
+          lastLoginAt: raw.last_login_at || new Date().toISOString(),
+          lastPackBatchAt: raw.last_pack_batch_at ?? null,
+          packsInCurrentBatch: Number(raw.packs_in_current_batch ?? 5),
+          totalPacksOpened: Number(raw.total_packs_opened ?? 0),
+          isActive: raw.is_active !== false,
+        };
+        localStorage.setItem('pcc_session', JSON.stringify({ token: data.session_token || '' }));
+        setPlayer(p);
+        return { error: null };
+      } catch (e: any) {
+        return { error: e?.message || 'Authentication service unavailable.' };
+      }
+    }
+
     const raw = localStorage.getItem(PLAYER_KEY(normalized));
     if (!raw) return { error: 'Invalid username or password.' };
-
     try {
       const savedPassword = localStorage.getItem(PASSWORD_KEY(normalized));
-      // Legacy accounts created before password persistence remain usable once,
-      // then receive a password for future logins.
-      if (savedPassword !== null && savedPassword !== password) {
-        return { error: 'Invalid username or password.' };
-      }
-
+      if (savedPassword !== null && savedPassword !== password) return { error: 'Invalid username or password.' };
       const p = JSON.parse(raw) as Player;
       if (p.isActive === false) return { error: 'This account is inactive. Contact an administrator.' };
-
-      if (savedPassword === null) {
-        localStorage.setItem(PASSWORD_KEY(normalized), password);
-      }
-
+      if (savedPassword === null) localStorage.setItem(PASSWORD_KEY(normalized), password);
       setPlayer({ ...p, lastLoginAt: new Date().toISOString() });
       return { error: null };
     } catch {
@@ -170,19 +193,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (
-    username: string,
-    password: string,
-    confirm: string,
-    displayName: string
-  ) => {
+  const signUp = async (username: string, password: string, confirm: string, displayName: string) => {
     const normalized = username.trim().toLowerCase();
     if (!normalized || !password) return { error: 'Username and password are required.' };
-    if (normalized.length < 3) return { error: 'Username must be at least 3 characters.' };
     if (password.length < 6) return { error: 'Password must be at least 6 characters.' };
     if (password !== confirm) return { error: 'Passwords do not match.' };
-    if (localStorage.getItem(PLAYER_KEY(normalized))) return { error: 'Username already exists.' };
 
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabase();
+        const { data, error } = await supabase!.rpc('register_player', {
+          p_display_name: displayName?.trim() || username.trim(),
+          p_password: password,
+          p_username: username.trim(),
+        });
+        if (error) return { error: error.message || 'Registration failed.' };
+        if (!data?.success) return { error: data?.error || 'Registration failed.' };
+        const raw = data.player || {};
+        const p: Player = {
+          id: raw.id,
+          username: raw.username,
+          usernameNormalized: (raw.username || '').toLowerCase(),
+          displayName: raw.display_name ?? raw.displayName ?? raw.username,
+          role: 'USER',
+          createdAt: raw.created_at || new Date().toISOString(),
+          lastLoginAt: raw.last_login_at || new Date().toISOString(),
+          lastPackBatchAt: raw.last_pack_batch_at ?? null,
+          packsInCurrentBatch: Number(raw.packs_in_current_batch ?? 5),
+          totalPacksOpened: Number(raw.total_packs_opened ?? 0),
+          isActive: true,
+        };
+        localStorage.setItem('pcc_session', JSON.stringify({ token: data.session_token || '' }));
+        setPlayer(p);
+        return { error: null };
+      } catch (e: any) {
+        return { error: e?.message || 'Authentication service unavailable.' };
+      }
+    }
+
+    if (localStorage.getItem(PLAYER_KEY(normalized))) return { error: 'Username already exists.' };
     const p = makePlayer(username, displayName);
     localStorage.setItem(PLAYER_KEY(normalized), JSON.stringify(p));
     localStorage.setItem(PLAYER_OBJECT_KEY(p.id), JSON.stringify(p));
@@ -210,7 +259,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAdmin: player?.role === 'ADMIN',
       // The current app uses its local, player-scoped persistence path. This
       // keeps login/collection reliable even when no Supabase runtime config exists.
-      isConfigured: false,
+      isConfigured: isSupabaseConfigured(),
       cooldown,
       welcomeModalState,
       isAuthModalOpen,
