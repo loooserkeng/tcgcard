@@ -1,11 +1,11 @@
 import { CollectedCard, PackHistoryItem, PersonCard, UserProfile } from '../types';
-import { cards } from '../data/cards';
+import { INITIAL_CARDS } from '../data/cards';
 const colKey=(id?:string)=>'pcc_collection_'+(id||'guest');
 const packKey=(id?:string)=>'pcc_packs_'+(id||'guest');
 const profileKey=(id?:string)=>'pcc_profile_'+(id||'guest');
 const customKey='pcc_custom_cards';
 function read<T>(k:string,f:T):T{try{const v=localStorage.getItem(k);return v?JSON.parse(v):f}catch{return f}}
-export function getAllAvailableCards():PersonCard[]{return [...cards,...read<PersonCard[]>(customKey,[])]}
+export function getAllAvailableCards():PersonCard[]{return [...INITIAL_CARDS,...read<PersonCard[]>(customKey,[])]}
 export function getStoredCollection(id?:string):Record<string,CollectedCard>{return read(colKey(id),{})}
 export function getStoredPackHistory(id?:string):PackHistoryItem[]{return read(packKey(id),[])}
 export function getStoredProfile(id?:string):UserProfile{return read(profileKey(id),{name:'Collector',title:'Premier Collector',avatar:'',packsOpened:0,totalCardsCollected:0,level:1})}
