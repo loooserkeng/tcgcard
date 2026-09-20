@@ -106,13 +106,13 @@ export const CardReveal: React.FC<CardRevealProps> = ({
   }, [currentIndex]);
 
   const revealAllAndSkip = () => {
+    if (isFlipping || cards.length === 0) return;
     soundManager.playPackOpening();
     const allRevealed: Record<number, boolean> = {};
-    cards.forEach((_, idx) => {
-      allRevealed[idx] = true;
-    });
+    cards.forEach((_, idx) => { allRevealed[idx] = true; });
     setRevealedMap(allRevealed);
-    onFinishPack(cards);
+    setCurrentIndex(0);
+    setSpecialEffectActive(false);
   };
 
   // Keyboard navigation: ArrowLeft, ArrowRight, Space
