@@ -19,6 +19,7 @@ type AuthValue = {
   updatePlayerState: (p: Player, c: CooldownState) => void;
   signIn: (u: string, p: string) => Promise<{ error: string | null }>;
   signUp: (u: string, p: string, c: string, d: string) => Promise<{ error: string | null }>;
+  signOut: () => Promise<void>;
 };
 
 const C = createContext<AuthValue | null>(null);
@@ -240,6 +241,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: null };
   };
 
+  const signOut = async () => {
+    try {
+      const supabase = getSupabase();
+      const token = (() => {
+        try { return (JSON.parse(localStorage.getItem('pcc_session') || '{}') as { token?: string }).token || ''; } catch { return ''; }
+      })();
+      if (supabase && token) {
+        await supabase.rpc('logout_player', { p_session_token: token });
+      }
+    } catch {}
+    localStorage.removeItem('pcc_session');
+    localStorage.removeItem(SESSION_KEY);
+    setPlayer(null);
+    setCooldown(defaultCooldown());
+    setWelcomeModalState('NONE');
+    setOpen(false);
+  };
+
   const updatePlayerState = (nextPlayer: Player, nextCooldown: CooldownState) => {
     setPlayer(nextPlayer);
     setCooldown(nextCooldown);
@@ -273,6 +292,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       updatePlayerState,
       signIn,
       signUp,
+      signOut,
     }),
     [player, cooldown, welcomeModalState, isAuthModalOpen, authModalMode]
   );
