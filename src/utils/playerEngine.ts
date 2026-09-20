@@ -1,0 +1,7 @@
+import { Player, CooldownState, PersonCard } from '../types';
+import { generatePack } from './packGenerator';
+import { addCardsToCollection } from './storage';
+const SESSION='pcc_session';
+export function getSavedSession(){try{return JSON.parse(localStorage.getItem(SESSION)||'{}') as {token:string}}catch{return {token:''}}}
+function cooldown(p:Player):CooldownState{const now=Date.now();if(p.lastPackBatchAt){const elapsed=(now-new Date(p.lastPackBatchAt).getTime())/1000;if(elapsed<3600&&p.packsInCurrentBatch>=5){return{packsAvailable:0,maxPacks:5,cooldownRemainingSeconds:Math.ceil(3600-elapsed),isCooldownActive:true,cooldownUntil:new Date(new Date(p.lastPackBatchAt).getTime()+3600000).toISOString()}}}return{packsAvailable:Math.max(0,5-p.packsInCurrentBatch),maxPacks:5,cooldownRemainingSeconds:0,isCooldownActive:false,cooldownUntil:null}}
+export async function openPackAtomic(player:Player,_packType:string){const c=cooldown(player);if(c.packsAvailable<=0)return{success:false,cooldown:c,updatedPlayer:player,cards:[] as PersonCard[],newCardsCount:0};const cards=generatePack();const updated={...player,totalPacksOpened:player.totalPacksOpened+1,packsInCurrentBatch:player.packsInCurrentBatch+1,lastPackBatchAt:player.lastPackBatchAt||new Date().toISOString()};addCardsToCollection(cards,player.id);const next=cooldown(updated);return{success:true,cooldown:next,updatedPlayer:updated,cards,newCardsCount:cards.length}};
