@@ -53,17 +53,14 @@ export function generatePack(packType: PackType = 'STANDARD'): PersonCard[] {
   const selectedCards: PersonCard[] = [];
   const pickedIds = new Set<string>();
 
-  // Slot plans for the 1 main premier booster pack
-  // 5 cards ascending towards the final suspenseful reveal
+  // Three-card drop: one-hour cooldown after each successful opening.
   const slotRarities: Rarity[] = [
     pickRarityFromPool(['COMMON', 'RARE']),
-    pickRarityFromPool(['COMMON', 'RARE']),
-    pickRarityFromPool(['RARE', 'SPECIAL']),
     pickRarityFromPool(['RARE', 'SPECIAL', 'EPIC']),
     pickRarityFromPool(['SPECIAL', 'EPIC', 'LEGENDARY']),
   ];
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 3; i++) {
     const targetRarity = slotRarities[i];
     // Find unpicked cards matching target rarity
     let candidates = allCards.filter(
