@@ -10,11 +10,11 @@ function localCooldown(p:Player):CooldownState{
  return{packsAvailable:Math.max(0,1-p.packsInCurrentBatch),maxPacks:1,cooldownRemainingSeconds:0,isCooldownActive:false,cooldownUntil:null}
 }
 function mapPlayer(raw:any,fallback:Player):Player{
- return {...fallback,id:raw.id||fallback.id,username:raw.username||fallback.username,usernameNormalized:(raw.username||fallback.username).toLowerCase(),displayName:raw.displayName??raw.display_name??fallback.displayName,role:raw.role||fallback.role,createdAt:raw.createdAt||raw.created_at||fallback.createdAt,lastLoginAt:raw.lastLoginAt||raw.last_login_at||fallback.lastLoginAt,lastPackBatchAt:raw.lastPackBatchAt??raw.last_pack_batch_at??null,packsInCurrentBatch:raw.packsInCurrentBatch??raw.packs_in_current_batch??5,totalPacksOpened:raw.totalPacksOpened??raw.total_packs_opened??0,isActive:raw.isActive??raw.is_active??true};
+ return {...fallback,id:raw.id||fallback.id,username:raw.username||fallback.username,usernameNormalized:(raw.username||fallback.username).toLowerCase(),displayName:raw.displayName??raw.display_name??fallback.displayName,role:raw.role||fallback.role,createdAt:raw.createdAt||raw.created_at||fallback.createdAt,lastLoginAt:raw.lastLoginAt||raw.last_login_at||fallback.lastLoginAt,lastPackBatchAt:raw.lastPackBatchAt??raw.last_pack_batch_at??null,packsInCurrentBatch:raw.packsInCurrentBatch??raw.packs_in_current_batch??0,totalPacksOpened:raw.totalPacksOpened??raw.total_packs_opened??0,isActive:raw.isActive??raw.is_active??true};
 }
 function mapCooldown(raw:any):CooldownState{
  const remaining=Number(raw?.cooldownRemainingSeconds??0);
- return{packsAvailable:Number(raw?.packsAvailable??5),maxPacks:5,cooldownRemainingSeconds:remaining,isCooldownActive:remaining>0,cooldownUntil:remaining>0?new Date(Date.now()+remaining*1000).toISOString():null};
+ return{packsAvailable:Number(raw?.packsAvailable??1),maxPacks:1,cooldownRemainingSeconds:remaining,isCooldownActive:remaining>0,cooldownUntil:remaining>0?new Date(Date.now()+remaining*1000).toISOString():null};
 }
 export async function openPackAtomic(player:Player,packType:string){
  if(isSupabaseConfigured()){
