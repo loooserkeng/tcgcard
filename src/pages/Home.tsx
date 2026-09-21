@@ -139,13 +139,13 @@ export const Home: React.FC<HomeProps> = ({
               <Package className="w-4 h-4 text-red-400" />
               <span className="text-neutral-300 uppercase font-bold">Booster Packs:</span>
               <span className={`font-black ${isCooldownActive ? 'text-amber-400' : 'text-red-300'}`}>
-                {packsAvail} / 5 AVAILABLE
+                {packsAvail} / 1 AVAILABLE
               </span>
             </div>
 
-            {/* 5 Indicator Pips */}
+            {/* 1 Indicator Pip */}
             <div className="flex items-center gap-1.5">
-              {[1, 2, 3, 4, 5].map((slot) => {
+              {[1].map((slot) => {
                 const isFilled = slot <= packsAvail;
                 return (
                   <div
@@ -166,7 +166,7 @@ export const Home: React.FC<HomeProps> = ({
             <div className="mt-2.5 flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-mono">
               <Clock className="w-3.5 h-3.5 text-amber-400 animate-spin" />
               <span>
-                NEXT BATCH OF 5 PACKS IN:{' '}
+                NEXT 3 CARDS IN:{' '}
                 <strong className="font-mono tracking-wider font-bold text-white">
                   {formatTimer(cooldown.cooldownRemainingSeconds)}
                 </strong>
@@ -221,7 +221,7 @@ export const Home: React.FC<HomeProps> = ({
               className="flex items-center gap-3 px-10 py-4 rounded-2xl bg-gradient-to-r from-red-600 via-rose-600 to-red-600 hover:from-red-500 hover:to-rose-500 text-white font-black font-serif tracking-[0.22em] text-sm sm:text-base uppercase shadow-2xl shadow-red-600/50 hover:scale-105 active:scale-95 transition-all cursor-pointer border border-red-400/40"
             >
               <Sparkles className="w-4 h-4 text-amber-300" />
-              <span>OPEN BOOSTER PACK</span>
+              <span>OPEN 3 CARDS</span>
             </button>
           )}
 
