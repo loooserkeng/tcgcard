@@ -6,8 +6,8 @@ import { getSupabase, isSupabaseConfigured } from './supabase';
 const SESSION='pcc_session';
 export function getSavedSession(){try{return JSON.parse(localStorage.getItem(SESSION)||'{}') as {token:string}}catch{return {token:''}}}
 function localCooldown(p:Player):CooldownState{
- const now=Date.now(); if(p.lastPackBatchAt){const elapsed=(now-new Date(p.lastPackBatchAt).getTime())/1000;if(elapsed<3600&&p.packsInCurrentBatch>=5)return{packsAvailable:0,maxPacks:5,cooldownRemainingSeconds:Math.ceil(3600-elapsed),isCooldownActive:true,cooldownUntil:new Date(new Date(p.lastPackBatchAt).getTime()+3600000).toISOString()}}
- return{packsAvailable:Math.max(0,5-p.packsInCurrentBatch),maxPacks:5,cooldownRemainingSeconds:0,isCooldownActive:false,cooldownUntil:null}
+ const now=Date.now(); if(p.lastPackBatchAt){const elapsed=(now-new Date(p.lastPackBatchAt).getTime())/1000;if(elapsed<3600&&p.packsInCurrentBatch>=1)return{packsAvailable:0,maxPacks:1,cooldownRemainingSeconds:Math.ceil(3600-elapsed),isCooldownActive:true,cooldownUntil:new Date(new Date(p.lastPackBatchAt).getTime()+3600000).toISOString()}}
+ return{packsAvailable:Math.max(0,1-p.packsInCurrentBatch),maxPacks:1,cooldownRemainingSeconds:0,isCooldownActive:false,cooldownUntil:null}
 }
 function mapPlayer(raw:any,fallback:Player):Player{
  return {...fallback,id:raw.id||fallback.id,username:raw.username||fallback.username,usernameNormalized:(raw.username||fallback.username).toLowerCase(),displayName:raw.displayName??raw.display_name??fallback.displayName,role:raw.role||fallback.role,createdAt:raw.createdAt||raw.created_at||fallback.createdAt,lastLoginAt:raw.lastLoginAt||raw.last_login_at||fallback.lastLoginAt,lastPackBatchAt:raw.lastPackBatchAt??raw.last_pack_batch_at??null,packsInCurrentBatch:raw.packsInCurrentBatch??raw.packs_in_current_batch??5,totalPacksOpened:raw.totalPacksOpened??raw.total_packs_opened??0,isActive:raw.isActive??raw.is_active??true};
@@ -26,7 +26,7 @@ export async function openPackAtomic(player:Player,packType:string){
   return{success:true,cooldown:mapCooldown(data),updatedPlayer:updated,cards:(data.cards||[]) as PersonCard[],newCardsCount:Number(data.newCardsCount??0)};
  }
  const c=localCooldown(player); if(c.packsAvailable<=0)return{success:false,cooldown:c,updatedPlayer:player,cards:[] as PersonCard[],newCardsCount:0};
- const cards=generatePack(); const updated={...player,totalPacksOpened:player.totalPacksOpened+1,packsInCurrentBatch:player.packsInCurrentBatch+1,lastPackBatchAt:player.lastPackBatchAt||new Date().toISOString()};
+ const cards=generatePack(); const updated={...player,totalPacksOpened:player.totalPacksOpened+1,packsInCurrentBatch:1,lastPackBatchAt:new Date().toISOString()};
  addCardsToCollection(cards,player.id); return{success:true,cooldown:localCooldown(updated),updatedPlayer:updated,cards,newCardsCount:cards.filter((x,i)=>i===cards.findIndex(y=>y.id===x.id)).length};
 }
 export async function fetchAdminPlayers(adminId:string){
