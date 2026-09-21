@@ -221,7 +221,7 @@ export const PackOpening: React.FC<PackOpeningProps> = ({
                 CARD COLLECTION
               </span>
               <div className="mt-4 px-3 py-1 rounded-full bg-black/60 border border-red-500/40 text-xs font-mono text-red-300 font-bold">
-                5 CARDS INSIDE
+                3 CARDS INSIDE
               </div>
             </div>
 
@@ -229,7 +229,7 @@ export const PackOpening: React.FC<PackOpeningProps> = ({
             <div className="relative z-10 h-6 w-full rounded-b-xl bg-gradient-to-r from-red-950 via-rose-900 to-red-950 border-t border-red-500/20" />
           </motion.div>
         ) : (
-          /* 5 CARDS FLYING OUT AND STACKING */
+          /* 3 CARDS FLYING OUT AND STACKING */
           <div className="relative w-64 h-[380px] sm:w-72 sm:h-[430px] flex items-center justify-center">
             {cards.map((card, idx) => (
               <motion.div
@@ -270,7 +270,7 @@ export const PackOpening: React.FC<PackOpeningProps> = ({
             {stage === 'shake' && 'CHARGING CINEMATIC ENERGY...'}
             {stage === 'tear' && 'UNSEALING BOOSTER FOIL...'}
             {stage === 'burst' && 'UNLEASHING COLLECTIBLES!'}
-            {stage === 'cards_emerge' && '5 ACTRESS CARDS REVEALED!'}
+            {stage === 'cards_emerge' && '3 ACTRESS CARDS REVEALED!'}
           </div>
           <p className="text-xs font-mono text-red-300/80 mt-1">
             Tap to inspect each actress card
