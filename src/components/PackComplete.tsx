@@ -41,9 +41,9 @@ export const PackComplete: React.FC<PackCompleteProps> = ({
     } catch {}
   };
 
-  // Rotation angles for 5-card fan arrangement: [-16, -8, 0, 8, 16]
-  const fanRotations = [-16, -8, 0, 8, 16];
-  const fanXOffsets = [-140, -70, 0, 70, 140];
+  // Rotation angles for the 3-card fan.
+  const fanRotations = [-10, 0, 10];
+  const fanXOffsets = [-90, 0, 90];
 
   return (
     <div
@@ -82,13 +82,13 @@ export const PackComplete: React.FC<PackCompleteProps> = ({
             </span>
           ) : (
             <span className="text-amber-400 font-bold">
-              5 ACTRESS CARDS ADDED (DUPLICATE COPIES UPGRADED)
+              3 ACTRESS CARDS ADDED (DUPLICATE COPIES UPGRADED)
             </span>
           )}
         </p>
       </div>
 
-      {/* --- 5-CARD FAN ARRANGEMENT --- */}
+      {/* --- 3-CARD FAN ARRANGEMENT --- */}
       <div className="relative z-20 my-auto w-full max-w-4xl h-[420px] flex items-center justify-center">
         {/* Desktop & Tablet Fan Display */}
         <div className="hidden sm:flex items-center justify-center relative w-full h-full">
