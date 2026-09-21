@@ -29,8 +29,8 @@ const PLAYER_OBJECT_KEY = (id: string) => 'pcc_player_obj_' + id;
 const PASSWORD_KEY = (u: string) => 'pcc_password_' + u.trim().toLowerCase();
 
 const defaultCooldown = (): CooldownState => ({
-  packsAvailable: 5,
-  maxPacks: 5,
+  packsAvailable: 1,
+  maxPacks: 1,
   cooldownRemainingSeconds: 0,
   isCooldownActive: false,
   cooldownUntil: null,
@@ -39,25 +39,25 @@ const defaultCooldown = (): CooldownState => ({
 function calculateCooldown(p: Player): CooldownState {
   const last = p.lastPackBatchAt ? new Date(p.lastPackBatchAt).getTime() : 0;
   const elapsed = last ? Math.floor((Date.now() - last) / 1000) : 3600;
-  if (p.packsInCurrentBatch >= 5 && elapsed < 3600) {
+  if (p.packsInCurrentBatch >= 1 && elapsed < 3600) {
     const remaining = Math.max(0, 3600 - elapsed);
     return {
       packsAvailable: 0,
-      maxPacks: 5,
+      maxPacks: 1,
       cooldownRemainingSeconds: remaining,
       isCooldownActive: remaining > 0,
       cooldownUntil: new Date(last + 3600000).toISOString(),
     };
   }
-  if (p.packsInCurrentBatch >= 5 && elapsed >= 3600) {
+  if (p.packsInCurrentBatch >= 1 && elapsed >= 3600) {
     const reset = { ...p, packsInCurrentBatch: 0, lastPackBatchAt: null };
     localStorage.setItem(PLAYER_KEY(p.username), JSON.stringify(reset));
     localStorage.setItem(PLAYER_OBJECT_KEY(reset.id), JSON.stringify(reset));
     return defaultCooldown();
   }
   return {
-    packsAvailable: Math.max(0, 5 - p.packsInCurrentBatch),
-    maxPacks: 5,
+    packsAvailable: Math.max(0, 1 - p.packsInCurrentBatch),
+    maxPacks: 1,
     cooldownRemainingSeconds: 0,
     isCooldownActive: false,
     cooldownUntil: null,
